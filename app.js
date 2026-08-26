@@ -3,6 +3,7 @@ const THEME_KEY = 'tee_trading_journal_theme';
 let trades = loadTrades();
 let currentBefore = '';
 let currentAfter = '';
+let pnlMode = 'profit';
 
 const $ = (id) => document.getElementById(id);
 const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
@@ -23,6 +24,20 @@ function dateTimeLocalValue(date=new Date()){
   return `${date.getFullYear()}-${p(date.getMonth()+1)}-${p(date.getDate())}T${p(date.getHours())}:${p(date.getMinutes())}`;
 }
 function fmtDate(s){ if(!s) return '-'; const d=new Date(s); return d.toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}); }
+function setPnlMode(mode){
+  pnlMode = mode;
+  const input = $('pnl');
+  if (input && mode === 'be') input.value = '0';
+  qsa('.pnl-mode-btn').forEach(b=>b.classList.remove('active'));
+  const target = mode==='loss' ? $('pnlLossBtn') : mode==='be' ? $('pnlBeBtn') : $('pnlProfitBtn');
+  target?.classList.add('active');
+  updateLiveCalc();
+}
+function signedPnlFromForm(){
+  const raw = Number($('pnl')?.value || 0);
+  if (pnlMode === 'be') return 0;
+  return pnlMode === 'loss' ? -Math.abs(raw) : Math.abs(raw);
+}
 function netPnl(t){ return Number(t.pnl||0) - Number(t.fees||0); }
 function rrOf(t){
   const e=Number(t.entry), x=Number(t.exit), s=Number(t.sl);
@@ -254,7 +269,7 @@ function openTradeForm(id=''){
   $('exit').value=t?.exit??'';
   $('sl').value=t?.sl??'';
   $('tp').value=t?.tp??'';
-  $('pnl').value=t?.pnl??'';
+  const existingPnl = Number(t?.pnl ?? 0); pnlMode = t ? (existingPnl<0?'loss':existingPnl>0?'profit':'be') : 'profit'; $('pnl').value=t ? Math.abs(existingPnl) : ''; setPnlMode(pnlMode);
   $('fees').value=t?.fees??0;
   $('riskUsd').value=t?.riskUsd??'';
   $('balance').value=t?.balance??'';
@@ -277,7 +292,7 @@ function fileToDataURL(file,max=1400,quality=.82){
 }
 async function handleImage(input,which){const f=input.files?.[0];if(!f)return;try{const data=await fileToDataURL(f);if(which==='before')currentBefore=data;else currentAfter=data;renderImagePreview();}catch{toast('อ่านรูปไม่สำเร็จ')}}
 function getFormTrade(){
-  return {id:$('tradeId').value||uid(),date:$('tradeDate').value,symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,lot:$('lot').value,entry:$('entry').value,exit:$('exit').value,sl:$('sl').value,tp:$('tp').value,pnl:$('pnl').value,fees:$('fees').value||0,riskUsd:$('riskUsd').value,balance:$('balance').value,setup:$('setup').value.trim(),session:$('session').value,emotion:$('emotion').value,followPlan:$('followPlan').value,mistakes:$('mistakes').value.trim(),reason:$('reason').value.trim(),note:$('note').value.trim(),beforeImage:currentBefore,afterImage:currentAfter,updatedAt:new Date().toISOString()};
+  return {id:$('tradeId').value||uid(),date:$('tradeDate').value,symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,lot:$('lot').value,entry:$('entry').value,exit:$('exit').value,sl:$('sl').value,tp:$('tp').value,pnl:signedPnlFromForm(),fees:$('fees').value||0,riskUsd:$('riskUsd').value,balance:$('balance').value,setup:$('setup').value.trim(),session:$('session').value,emotion:$('emotion').value,followPlan:$('followPlan').value,mistakes:$('mistakes').value.trim(),reason:$('reason').value.trim(),note:$('note').value.trim(),beforeImage:currentBefore,afterImage:currentAfter,updatedAt:new Date().toISOString()};
 }
 function updateLiveCalc(){
   const t=getFormTrade();const rr=plannedRR(t),actual=rrOf(t),net=netPnl(t),r=rMultiple(t),rp=riskPct(t);
@@ -313,6 +328,9 @@ $('cancelBtn').onclick=()=> $('tradeDialog').close();
 $('closeDetailBtn').onclick=()=> $('detailDialog').close();
 $('tradeForm').addEventListener('submit',e=>{e.preventDefault();const t=getFormTrade();if(!t.date||!t.symbol||!t.entry){alert('กรอก วันที่, Symbol และ Entry');return}const i=trades.findIndex(x=>x.id===t.id);if(i>=0)trades[i]=t;else trades.push(t);saveTrades();$('tradeDialog').close();renderAll();toast('บันทึกแล้ว');});
 ['entry','exit','sl','tp','pnl','fees','riskUsd','balance'].forEach(id=>$(id).addEventListener('input',updateLiveCalc));
+$('pnlProfitBtn').onclick=()=>setPnlMode('profit');
+$('pnlLossBtn').onclick=()=>setPnlMode('loss');
+$('pnlBeBtn').onclick=()=>setPnlMode('be');
 $('beforeImage').onchange=()=>handleImage($('beforeImage'),'before');
 $('afterImage').onchange=()=>handleImage($('afterImage'),'after');
 ['periodFilter','symbolFilter','sideFilter'].forEach(id=>$(id).onchange=renderDashboard);

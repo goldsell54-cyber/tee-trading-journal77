@@ -192,3 +192,23 @@ dialog{width:min(980px,94vw);max-height:92vh;overflow:auto;border-radius:24px;pa
   .trade-card-grid{grid-template-columns:1fr 1fr}
   .toast{left:12px;right:12px;bottom:90px;text-align:center}
 }
+
+.signed-input{display:grid;grid-template-columns:1fr 52px;gap:8px;align-items:stretch}
+.signed-input input{min-width:0}
+.sign-btn{border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-size:22px;font-weight:900;cursor:pointer}
+.sign-btn:active{transform:scale(.96);background:rgba(123,140,255,.14)}
+.field-hint{color:var(--muted);font-size:11px;margin-top:2px;line-height:1.4}
+
+
+/* Easy mobile P/L entry */
+.pnl-field{grid-column:span 2}
+.pnl-mode{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:9px}
+.pnl-mode-btn{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-weight:900;cursor:pointer;transition:.16s ease}
+.pnl-mode-btn.active{color:#fff;transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.16)}
+.pnl-mode-btn.profit.active{background:linear-gradient(135deg,#16a887,#2fcab4);border-color:rgba(51,208,189,.6)}
+.pnl-mode-btn.loss.active{background:linear-gradient(135deg,#e15163,#ff6b7a);border-color:rgba(255,107,122,.65)}
+.pnl-mode-btn.be.active{background:linear-gradient(135deg,#8b96ad,#667085);border-color:rgba(160,174,201,.45)}
+.field-hint{font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px}
+.pnl-field input{font-size:18px;font-weight:800}
+@media(max-width:760px){.pnl-field{grid-column:1/-1}.pnl-mode-btn{min-height:52px;font-size:15px}}
+@media(max-width:420px){.pnl-mode{grid-template-columns:1fr 1fr}.pnl-mode-btn.be{grid-column:1/-1}}

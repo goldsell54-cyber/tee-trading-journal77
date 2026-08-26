@@ -367,7 +367,16 @@ dialog{width:min(980px,94vw);max-height:92vh;overflow:auto;border-radius:24px;pa
         <div class="field"><label>Exit</label><input id="exit" type="number" step="any" /></div>
         <div class="field"><label>SL</label><input id="sl" type="number" step="any" /></div>
         <div class="field"><label>TP</label><input id="tp" type="number" step="any" /></div>
-        <div class="field"><label>กำไร/ขาดทุน (USD)</label><input id="pnl" type="number" step="0.01" placeholder="เช่น 120 หรือ -45" /></div>
+        <div class="field pnl-field">
+          <label>ผลการเทรด (USD)</label>
+          <div class="pnl-mode" role="group" aria-label="เลือกผลการเทรด">
+            <button type="button" class="pnl-mode-btn profit active" id="pnlProfitBtn">กำไร +</button>
+            <button type="button" class="pnl-mode-btn loss" id="pnlLossBtn">ขาดทุน −</button>
+            <button type="button" class="pnl-mode-btn be" id="pnlBeBtn">เสมอ 0</button>
+          </div>
+          <input id="pnl" type="number" step="0.01" min="0" inputmode="decimal" placeholder="ใส่จำนวนเงิน เช่น 120" />
+          <small class="field-hint">ใส่แค่ตัวเลข แล้วเลือก กำไร / ขาดทุน — ไม่ต้องพิมพ์เครื่องหมายลบ</small>
+        </div>
         <div class="field"><label>ค่าคอม / Swap</label><input id="fees" type="number" step="0.01" value="0" /></div>
         <div class="field"><label>Risk ที่ยอมเสีย (USD)</label><input id="riskUsd" type="number" step="0.01" min="0" placeholder="เช่น 50" /></div>
         <div class="field"><label>Balance ก่อนเข้า (USD)</label><input id="balance" type="number" step="0.01" min="0" placeholder="เช่น 1000" /></div>
