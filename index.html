@@ -203,7 +203,27 @@ dialog{width:min(980px,94vw);max-height:92vh;overflow:auto;border-radius:24px;pa
   .toast{left:12px;right:12px;bottom:90px;text-align:center}
 }
 
-  </style>
+.signed-input{display:grid;grid-template-columns:1fr 52px;gap:8px;align-items:stretch}
+.signed-input input{min-width:0}
+.sign-btn{border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);font-size:22px;font-weight:900;cursor:pointer}
+.sign-btn:active{transform:scale(.96);background:rgba(123,140,255,.14)}
+.field-hint{color:var(--muted);font-size:11px;margin-top:2px;line-height:1.4}
+
+
+/* Easy mobile P/L entry */
+.pnl-field{grid-column:span 2}
+.pnl-mode{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:9px}
+.pnl-mode-btn{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-weight:900;cursor:pointer;transition:.16s ease}
+.pnl-mode-btn.active{color:#fff;transform:translateY(-1px);box-shadow:0 10px 24px rgba(0,0,0,.16)}
+.pnl-mode-btn.profit.active{background:linear-gradient(135deg,#16a887,#2fcab4);border-color:rgba(51,208,189,.6)}
+.pnl-mode-btn.loss.active{background:linear-gradient(135deg,#e15163,#ff6b7a);border-color:rgba(255,107,122,.65)}
+.pnl-mode-btn.be.active{background:linear-gradient(135deg,#8b96ad,#667085);border-color:rgba(160,174,201,.45)}
+.field-hint{font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px}
+.pnl-field input{font-size:18px;font-weight:800}
+@media(max-width:760px){.pnl-field{grid-column:1/-1}.pnl-mode-btn{min-height:52px;font-size:15px}}
+@media(max-width:420px){.pnl-mode{grid-template-columns:1fr 1fr}.pnl-mode-btn.be{grid-column:1/-1}}
+
+</style>
 </head>
 <body>
   <div class="app-shell">
@@ -434,6 +454,7 @@ const THEME_KEY = 'tee_trading_journal_theme';
 let trades = loadTrades();
 let currentBefore = '';
 let currentAfter = '';
+let pnlMode = 'profit';
 
 const $ = (id) => document.getElementById(id);
 const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
@@ -454,6 +475,20 @@ function dateTimeLocalValue(date=new Date()){
   return `${date.getFullYear()}-${p(date.getMonth()+1)}-${p(date.getDate())}T${p(date.getHours())}:${p(date.getMinutes())}`;
 }
 function fmtDate(s){ if(!s) return '-'; const d=new Date(s); return d.toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}); }
+function setPnlMode(mode){
+  pnlMode = mode;
+  const input = $('pnl');
+  if (input && mode === 'be') input.value = '0';
+  qsa('.pnl-mode-btn').forEach(b=>b.classList.remove('active'));
+  const target = mode==='loss' ? $('pnlLossBtn') : mode==='be' ? $('pnlBeBtn') : $('pnlProfitBtn');
+  target?.classList.add('active');
+  updateLiveCalc();
+}
+function signedPnlFromForm(){
+  const raw = Number($('pnl')?.value || 0);
+  if (pnlMode === 'be') return 0;
+  return pnlMode === 'loss' ? -Math.abs(raw) : Math.abs(raw);
+}
 function netPnl(t){ return Number(t.pnl||0) - Number(t.fees||0); }
 function rrOf(t){
   const e=Number(t.entry), x=Number(t.exit), s=Number(t.sl);
@@ -685,7 +720,7 @@ function openTradeForm(id=''){
   $('exit').value=t?.exit??'';
   $('sl').value=t?.sl??'';
   $('tp').value=t?.tp??'';
-  $('pnl').value=t?.pnl??'';
+  const existingPnl = Number(t?.pnl ?? 0); pnlMode = t ? (existingPnl<0?'loss':existingPnl>0?'profit':'be') : 'profit'; $('pnl').value=t ? Math.abs(existingPnl) : ''; setPnlMode(pnlMode);
   $('fees').value=t?.fees??0;
   $('riskUsd').value=t?.riskUsd??'';
   $('balance').value=t?.balance??'';
@@ -708,7 +743,7 @@ function fileToDataURL(file,max=1400,quality=.82){
 }
 async function handleImage(input,which){const f=input.files?.[0];if(!f)return;try{const data=await fileToDataURL(f);if(which==='before')currentBefore=data;else currentAfter=data;renderImagePreview();}catch{toast('อ่านรูปไม่สำเร็จ')}}
 function getFormTrade(){
-  return {id:$('tradeId').value||uid(),date:$('tradeDate').value,symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,lot:$('lot').value,entry:$('entry').value,exit:$('exit').value,sl:$('sl').value,tp:$('tp').value,pnl:$('pnl').value,fees:$('fees').value||0,riskUsd:$('riskUsd').value,balance:$('balance').value,setup:$('setup').value.trim(),session:$('session').value,emotion:$('emotion').value,followPlan:$('followPlan').value,mistakes:$('mistakes').value.trim(),reason:$('reason').value.trim(),note:$('note').value.trim(),beforeImage:currentBefore,afterImage:currentAfter,updatedAt:new Date().toISOString()};
+  return {id:$('tradeId').value||uid(),date:$('tradeDate').value,symbol:$('symbol').value.trim().toUpperCase(),side:$('side').value,lot:$('lot').value,entry:$('entry').value,exit:$('exit').value,sl:$('sl').value,tp:$('tp').value,pnl:signedPnlFromForm(),fees:$('fees').value||0,riskUsd:$('riskUsd').value,balance:$('balance').value,setup:$('setup').value.trim(),session:$('session').value,emotion:$('emotion').value,followPlan:$('followPlan').value,mistakes:$('mistakes').value.trim(),reason:$('reason').value.trim(),note:$('note').value.trim(),beforeImage:currentBefore,afterImage:currentAfter,updatedAt:new Date().toISOString()};
 }
 function updateLiveCalc(){
   const t=getFormTrade();const rr=plannedRR(t),actual=rrOf(t),net=netPnl(t),r=rMultiple(t),rp=riskPct(t);
@@ -744,6 +779,9 @@ $('cancelBtn').onclick=()=> $('tradeDialog').close();
 $('closeDetailBtn').onclick=()=> $('detailDialog').close();
 $('tradeForm').addEventListener('submit',e=>{e.preventDefault();const t=getFormTrade();if(!t.date||!t.symbol||!t.entry){alert('กรอก วันที่, Symbol และ Entry');return}const i=trades.findIndex(x=>x.id===t.id);if(i>=0)trades[i]=t;else trades.push(t);saveTrades();$('tradeDialog').close();renderAll();toast('บันทึกแล้ว');});
 ['entry','exit','sl','tp','pnl','fees','riskUsd','balance'].forEach(id=>$(id).addEventListener('input',updateLiveCalc));
+$('pnlProfitBtn').onclick=()=>setPnlMode('profit');
+$('pnlLossBtn').onclick=()=>setPnlMode('loss');
+$('pnlBeBtn').onclick=()=>setPnlMode('be');
 $('beforeImage').onchange=()=>handleImage($('beforeImage'),'before');
 $('afterImage').onchange=()=>handleImage($('afterImage'),'after');
 ['periodFilter','symbolFilter','sideFilter'].forEach(id=>$(id).onchange=renderDashboard);
@@ -759,6 +797,6 @@ window.addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setT
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 applyTheme();renderAll();
 
-  </script>
+</script>
 </body>
 </html>
