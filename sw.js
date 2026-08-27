@@ -1,6 +1,6 @@
-const CACHE = 'tee-trading-journal-v5';
+const CACHE = 'tee-trading-journal-v6';
 
-const ASSETS = [
+const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
@@ -9,51 +9,44 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE)
-      .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(key => key !== CACHE).map(key => caches.delete(key))
-      ))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+  const req = event.request;
 
-  const request = event.request;
-
-  if (request.mode === 'navigate') {
+  if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
           caches.open(CACHE).then(cache => cache.put('./index.html', copy));
-          return response;
+          return res;
         })
-        .catch(() =>
-          caches.match('./index.html').then(cached => cached || caches.match('./'))
-        )
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
 
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        if (response && response.status === 200) {
-          const copy = response.clone();
-          caches.open(CACHE).then(cache => cache.put(request, copy));
+    fetch(req)
+      .then(res => {
+        if (res && res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(cache => cache.put(req, copy));
         }
-        return response;
+        return res;
       })
-      .catch(() => caches.match(request))
+      .catch(() => caches.match(req))
   );
 });

@@ -1,3 +1,3 @@
-# Tee Trading Journal 77
+# Tee Trading Journal 77 — Visual Review v6
 
-Mobile-first Trading Journal for GitHub Pages.
+Mobile-first trading journal with visual Before/After trade review, Winning/Losing galleries, Best Setup Gallery and Daily Review.
