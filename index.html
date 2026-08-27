@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b1020" />
-  <title>Tee Trading Journal v6</title>
-  <!-- Visual Review v6 -->
+  <title>Tee Trading Journal v6.1</title>
+  <!-- Visual Review v6.1 - mobile nav fix -->
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <style>
@@ -180,14 +180,19 @@ dialog{width:min(980px,94vw);max-height:92vh;overflow:auto;border-radius:24px;pa
   .form-grid{grid-template-columns:1fr 1fr}
   dialog{width:100vw;max-width:none;max-height:100dvh;height:100dvh;border-radius:24px 24px 0 0;padding:18px;margin:0}
   .bottom-nav{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;position:fixed;left:10px;right:10px;bottom:10px;z-index:45;
+    display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;position:fixed;left:10px;right:10px;bottom:10px;z-index:45;
     padding:10px;border-radius:22px;background:rgba(10,17,31,.92);border:1px solid var(--line);backdrop-filter:blur(18px);box-shadow:var(--shadow)
   }
   :root.light .bottom-nav{background:rgba(255,255,255,.92)}
-  .bottom-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:16px;background:transparent;color:var(--muted);border:1px solid transparent}
-  .bottom-item span{font-size:18px}.bottom-item small{font-size:11px;font-weight:800}
+  .bottom-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px;border-radius:16px;background:transparent;color:var(--muted);border:1px solid transparent}
+  .bottom-item span{font-size:17px}.bottom-item small{font-size:10px;font-weight:800;white-space:nowrap}
   .bottom-item.active{background:var(--panel);color:var(--text);border-color:var(--line)}
-  .fab-add{display:flex;align-items:center;justify-content:center}
+  .fab-add{
+    display:flex;align-items:center;justify-content:center;
+    right:16px;
+    bottom:calc(108px + env(safe-area-inset-bottom));
+    width:54px;height:54px;font-size:29px;
+  }
 }
 @media(max-width:620px){
   .card{padding:15px}

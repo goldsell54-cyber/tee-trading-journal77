@@ -1,4 +1,4 @@
-const CACHE = 'tee-trading-journal-v6';
+const CACHE = 'tee-trading-journal-v6-1';
 
 const CORE = [
   './',

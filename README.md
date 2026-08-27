@@ -1,3 +1,3 @@
-# Tee Trading Journal 77 — Visual Review v6
+# Tee Trading Journal 77 — Visual Review v6.1
 
-Mobile-first trading journal with visual Before/After trade review, Winning/Losing galleries, Best Setup Gallery and Daily Review.
+แก้เมนูมือถือให้ 5 ปุ่มอยู่แถวเดียว และย้ายปุ่ม + ขึ้นเหนือแถบเมนูเพื่อไม่บังปุ่ม Review/สำรอง
